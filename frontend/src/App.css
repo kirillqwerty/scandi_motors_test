@@ -1,9 +1,9 @@
-/* App-level overrides */
+/* Scandi Motors - App Styles */
 .glass-header {
-  background: rgba(10, 10, 11, 0.6);
+  background: rgba(10, 10, 11, 0.75);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .car-card {
@@ -11,39 +11,52 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .car-card:hover {
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 198, 49, 0.4);
 }
-
 .car-card:hover .car-card-image {
   transform: scale(1.05);
 }
-
 .car-card-image {
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-primary {
-  background: #E63946;
-  color: white;
+  background: #FFC631;
+  color: #050505;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   font-size: 0.8rem;
-  padding: 1rem 2rem;
+  padding: 0.875rem 2rem;
   transition: background-color 0.3s ease;
   border: none;
   cursor: pointer;
 }
-
 .btn-primary:hover {
-  background: #F05662;
+  background: #FFD45A;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(255, 198, 49, 0.4);
+  color: #FFC631;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  padding: 0.875rem 2rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.btn-outline:hover {
+  background: rgba(255, 198, 49, 0.1);
+  border-color: #FFC631;
 }
 
 .input-dark {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: white;
   padding: 0.875rem 1rem;
   font-family: 'Outfit', sans-serif;
@@ -52,13 +65,11 @@
   outline: none;
   width: 100%;
 }
-
 .input-dark::placeholder {
   color: #71717A;
 }
-
 .input-dark:focus {
-  border-color: rgba(255, 255, 255, 0.6);
+  border-color: #FFC631;
 }
 
 .gradient-overlay {
@@ -69,7 +80,7 @@
   font-family: 'Cabinet Grotesk', sans-serif;
   font-weight: 900;
   line-height: 1;
-  color: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 198, 49, 0.06);
   font-size: 8rem;
   position: absolute;
   top: -1rem;
@@ -78,8 +89,58 @@
   pointer-events: none;
 }
 
+.page-container {
+  min-height: 100vh;
+  background: #050505;
+}
+
+.info-page-hero {
+  position: relative;
+  padding: 10rem 0 4rem;
+  overflow: hidden;
+}
+.info-page-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(to top, #050505, transparent);
+}
+
+.prose-dark {
+  color: #d4d4d8;
+  line-height: 1.8;
+}
+.prose-dark p { margin-bottom: 1.25rem; }
+.prose-dark h3 {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: white;
+  margin: 2rem 0 0.75rem;
+}
+.prose-dark ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1.25rem;
+}
+.prose-dark ul li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.prose-dark ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6rem;
+  width: 6px;
+  height: 6px;
+  background: #FFC631;
+}
+
 @media (max-width: 768px) {
-  .stat-number {
-    font-size: 5rem;
-  }
+  .stat-number { font-size: 5rem; }
 }

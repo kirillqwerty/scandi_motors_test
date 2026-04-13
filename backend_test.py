@@ -4,7 +4,7 @@ import sys
 import json
 from datetime import datetime
 
-class AutoMinskAPITester:
+class ScandiMotorsAPITester:
     def __init__(self, base_url="https://cars-minsk.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
@@ -116,7 +116,7 @@ class AutoMinskAPITester:
         return success
 
     def test_get_cars(self):
-        """Test getting cars list"""
+        """Test getting cars list with new fields"""
         success, response = self.run_test(
             "Get Cars List",
             "GET",
@@ -128,6 +128,24 @@ class AutoMinskAPITester:
             print(f"   Found {cars_count} cars")
             if cars_count >= 6:
                 print(f"   ✅ Expected 6+ cars, found {cars_count}")
+                
+                # Check if cars have new fields
+                if cars_count > 0:
+                    first_car = response[0]
+                    new_fields = ['fuel_type', 'body_type', 'color', 'drive_type', 'power', 'is_from_europe', 'is_commission']
+                    missing_fields = [field for field in new_fields if field not in first_car]
+                    
+                    if missing_fields:
+                        print(f"   ⚠️  Missing new fields: {missing_fields}")
+                        return False, response
+                    else:
+                        print(f"   ✅ All new fields present: {new_fields}")
+                        
+                        # Check for Europe and Commission cars
+                        europe_cars = [car for car in response if car.get('is_from_europe')]
+                        commission_cars = [car for car in response if car.get('is_commission')]
+                        print(f"   Found {len(europe_cars)} European cars, {len(commission_cars)} commission cars")
+                
                 return True, response
             else:
                 print(f"   ⚠️  Expected 6+ cars, found {cars_count}")
@@ -172,6 +190,119 @@ class AutoMinskAPITester:
         if success:
             subs_count = len(response) if isinstance(response, list) else 0
             print(f"   Found {subs_count} submissions")
+        return success
+
+    def test_get_articles(self):
+        """Test getting articles list"""
+        success, response = self.run_test(
+            "Get Articles List",
+            "GET",
+            "articles",
+            200
+        )
+        if success:
+            articles_count = len(response) if isinstance(response, list) else 0
+            print(f"   Found {articles_count} articles")
+            if articles_count >= 2:
+                print(f"   ✅ Expected 2+ articles, found {articles_count}")
+                
+                # Check article structure
+                if articles_count > 0:
+                    first_article = response[0]
+                    required_fields = ['id', 'title', 'content', 'slug', 'published', 'created_at']
+                    missing_fields = [field for field in required_fields if field not in first_article]
+                    
+                    if missing_fields:
+                        print(f"   ⚠️  Missing article fields: {missing_fields}")
+                        return False, response
+                    else:
+                        print(f"   ✅ All article fields present")
+                
+                return True, response
+            else:
+                print(f"   ⚠️  Expected 2+ articles, found {articles_count}")
+                return False, response
+        return False, []
+
+    def test_get_specific_article(self, article_id):
+        """Test getting a specific article"""
+        success, response = self.run_test(
+            "Get Specific Article",
+            "GET",
+            f"articles/{article_id}",
+            200
+        )
+        return success, response
+
+    def test_article_crud_operations(self):
+        """Test article CRUD operations (requires admin token)"""
+        if not self.token:
+            self.log_test("Article CRUD Operations", False, "No admin token available")
+            return False
+
+        # Test creating an article
+        test_article = {
+            "title": "Test Article",
+            "content": "This is a test article content.\n\nSecond paragraph for testing.",
+            "excerpt": "Test article excerpt",
+            "image_url": "https://example.com/test-article.jpg",
+            "published": True
+        }
+
+        success, article_response = self.run_test(
+            "Create Article (Admin)",
+            "POST",
+            "articles",
+            200,
+            data=test_article
+        )
+
+        if not success:
+            return False
+
+        article_id = article_response.get('id')
+        if not article_id:
+            self.log_test("Article CRUD Operations", False, "No article ID returned")
+            return False
+
+        print(f"   Created article with ID: {article_id}")
+
+        # Test getting the specific article
+        success, _ = self.run_test(
+            "Get Specific Article",
+            "GET",
+            f"articles/{article_id}",
+            200
+        )
+
+        if not success:
+            return False
+
+        # Test updating the article
+        update_data = {
+            "title": "Updated Test Article",
+            "excerpt": "Updated excerpt"
+        }
+
+        success, _ = self.run_test(
+            "Update Article (Admin)",
+            "PUT",
+            f"articles/{article_id}",
+            200,
+            data=update_data
+        )
+
+        if not success:
+            return False
+
+        # Test deleting the article
+        success, _ = self.run_test(
+            "Delete Article (Admin)",
+            "DELETE",
+            f"articles/{article_id}",
+            200
+        )
+
         return success
 
     def test_car_crud_operations(self):
@@ -252,7 +383,7 @@ class AutoMinskAPITester:
 
     def run_all_tests(self):
         """Run all tests in sequence"""
-        print("🚀 Starting AutoMinsk API Tests")
+        print("🚀 Starting Scandi Motors API Tests")
         print(f"   Base URL: {self.base_url}")
         print("=" * 60)
 
@@ -267,7 +398,14 @@ class AutoMinskAPITester:
         self.test_seed_data()
         
         # Cars tests
-        self.test_get_cars()
+        cars_success, cars_data = self.test_get_cars()
+        
+        # Articles tests
+        articles_success, articles_data = self.test_get_articles()
+        if articles_success and articles_data:
+            # Test getting a specific article
+            first_article_id = articles_data[0]['id']
+            self.test_get_specific_article(first_article_id)
         
         # Submissions tests
         submission_success, submission_id = self.test_create_submission()
@@ -275,6 +413,7 @@ class AutoMinskAPITester:
         
         # CRUD tests (requires admin token)
         self.test_car_crud_operations()
+        self.test_article_crud_operations()
 
         # Print summary
         print("\n" + "=" * 60)
@@ -292,7 +431,7 @@ class AutoMinskAPITester:
             return 1
 
 def main():
-    tester = AutoMinskAPITester()
+    tester = ScandiMotorsAPITester()
     return tester.run_all_tests()
 
 if __name__ == "__main__":

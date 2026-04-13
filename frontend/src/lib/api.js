@@ -11,6 +11,13 @@ const api = {
   updateCar: (id, data, token) => axios.put(`${API}/cars/${id}`, data, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.data),
   deleteCar: (id, token) => axios.delete(`${API}/cars/${id}`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.data),
 
+  // Articles
+  getArticles: (all = false) => axios.get(`${API}/articles`, { params: { all } }).then(r => r.data),
+  getArticle: (id) => axios.get(`${API}/articles/${id}`).then(r => r.data),
+  createArticle: (data, token) => axios.post(`${API}/articles`, data, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.data),
+  updateArticle: (id, data, token) => axios.put(`${API}/articles/${id}`, data, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.data),
+  deleteArticle: (id, token) => axios.delete(`${API}/articles/${id}`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.data),
+
   // Submissions
   createSubmission: (data) => axios.post(`${API}/submissions`, data).then(r => r.data),
   getSubmissions: (token) => axios.get(`${API}/submissions`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.data),

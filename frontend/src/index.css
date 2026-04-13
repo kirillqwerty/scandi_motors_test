@@ -8,8 +8,9 @@
 :root {
   --bg-primary: #050505;
   --bg-surface: #0A0A0B;
-  --accent: #E63946;
-  --accent-hover: #F05662;
+  --accent: #FFC631;
+  --accent-hover: #FFD45A;
+  --accent-blue: #1A5697;
   --text-main: #FFFFFF;
   --text-muted: #A1A1AA;
   --border-color: rgba(255, 255, 255, 0.1);
@@ -40,7 +41,7 @@ h1, h2, h3, h4, h5, h6 {
 
 ::selection {
   background: var(--accent);
-  color: white;
+  color: #050505;
 }
 
 ::-webkit-scrollbar {
@@ -60,30 +61,14 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(255, 255, 255, 0.25);
 }
 
-@keyframes marquee-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
 @keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-up {
   animation: fade-up 0.8s ease-out forwards;
 }
-
-.delay-100 { animation-delay: 0.1s; }
-.delay-200 { animation-delay: 0.2s; }
-.delay-300 { animation-delay: 0.3s; }
-.delay-400 { animation-delay: 0.4s; }
 
 @layer base {
   :root {
@@ -93,8 +78,8 @@ h1, h2, h3, h4, h5, h6 {
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 4%;
     --popover-foreground: 0 0% 98%;
-    --primary: 355 78% 56%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 44 100% 60%;
+    --primary-foreground: 0 0% 2%;
     --secondary: 0 0% 8%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 10%;
@@ -105,7 +90,7 @@ h1, h2, h3, h4, h5, h6 {
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
-    --ring: 355 78% 56%;
+    --ring: 44 100% 60%;
     --radius: 0.25rem;
   }
 }
@@ -124,13 +109,8 @@ h1, h2, h3, h4, h5, h6 {
     display: contents !important;
   }
   [data-debug-wrapper="true"] > * {
-    margin-left: inherit;
-    margin-right: inherit;
-    margin-top: inherit;
-    margin-bottom: inherit;
-    padding-left: inherit;
-    padding-right: inherit;
-    padding-top: inherit;
-    padding-bottom: inherit;
+    margin-left: inherit; margin-right: inherit; margin-top: inherit;
+    margin-bottom: inherit; padding-left: inherit; padding-right: inherit;
+    padding-top: inherit; padding-bottom: inherit;
   }
 }
