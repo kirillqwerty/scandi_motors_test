@@ -4,6 +4,7 @@ import {
   Car, MessageSquare, LogOut, Plus, Trash2, Eye, Pencil,
   LayoutDashboard, ChevronLeft, FileText
 } from "lucide-react";
+import DragDropUpload from "@/components/DragDropUpload";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -229,7 +230,10 @@ function CarForm({ token, car, onDone }) {
         <div><label className="text-xs uppercase tracking-wider text-zinc-500 mb-1 block">Привод</label><input data-testid="car-drive" value={form.drive_type} onChange={(e) => update("drive_type", e.target.value)} className="input-dark text-sm" placeholder="Полный" /></div>
         <div><label className="text-xs uppercase tracking-wider text-zinc-500 mb-1 block">Мощность</label><input data-testid="car-power" value={form.power} onChange={(e) => update("power", e.target.value)} className="input-dark text-sm" placeholder="340 л.с." /></div>
       </div>
-      <div><label className="text-xs uppercase tracking-wider text-zinc-500 mb-1 block">URL изображения</label><input data-testid="car-image-url" value={form.image_url} onChange={(e) => update("image_url", e.target.value)} className="input-dark text-sm" placeholder="https://..." /></div>
+      <div>
+        <label className="text-xs uppercase tracking-wider text-zinc-500 mb-2 block">Фото автомобиля</label>
+        <DragDropUpload value={form.image_url} onChange={(url) => update("image_url", url)} token={token} testId="car-image-upload" />
+      </div>
       <div><label className="text-xs uppercase tracking-wider text-zinc-500 mb-1 block">Описание</label><textarea data-testid="car-description" rows={3} value={form.description} onChange={(e) => update("description", e.target.value)} className="input-dark text-sm resize-none" /></div>
       <div className="flex gap-4">
         <label className="flex items-center gap-2 cursor-pointer" data-testid="car-europe-toggle">
@@ -347,7 +351,10 @@ function ArticleForm({ token, article, onDone }) {
     <form onSubmit={handleSave} className="space-y-4" data-testid="article-form">
       <div><label className="text-xs uppercase tracking-wider text-zinc-500 mb-1 block">Заголовок *</label><input data-testid="article-title" value={form.title} onChange={(e) => update("title", e.target.value)} className="input-dark text-sm" required /></div>
       <div><label className="text-xs uppercase tracking-wider text-zinc-500 mb-1 block">Краткое описание</label><input data-testid="article-excerpt" value={form.excerpt} onChange={(e) => update("excerpt", e.target.value)} className="input-dark text-sm" placeholder="Короткое описание для карточки" /></div>
-      <div><label className="text-xs uppercase tracking-wider text-zinc-500 mb-1 block">URL изображения</label><input data-testid="article-image" value={form.image_url} onChange={(e) => update("image_url", e.target.value)} className="input-dark text-sm" placeholder="https://..." /></div>
+      <div>
+        <label className="text-xs uppercase tracking-wider text-zinc-500 mb-2 block">Изображение статьи</label>
+        <DragDropUpload value={form.image_url} onChange={(url) => update("image_url", url)} token={token} testId="article-image-upload" />
+      </div>
       <div>
         <label className="text-xs uppercase tracking-wider text-zinc-500 mb-1 block">Содержание *</label>
         <textarea data-testid="article-content" rows={10} value={form.content} onChange={(e) => update("content", e.target.value)} className="input-dark text-sm resize-none" required placeholder="Текст статьи. Используйте переносы строк для абзацев, '- ' для списков." />

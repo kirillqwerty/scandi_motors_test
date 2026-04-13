@@ -2,6 +2,7 @@
 import requests
 import sys
 import json
+import io
 from datetime import datetime
 
 class ScandiMotorsAPITester:
@@ -381,6 +382,123 @@ class ScandiMotorsAPITester:
 
         return success
 
+    def test_upload_image(self):
+        """Test image upload functionality"""
+        if not self.token:
+            self.log_test("Image Upload", False, "No admin token available")
+            return False
+
+        # Create a simple test image (1x1 pixel JPG)
+        test_image_data = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00\xff\xdb\x00C\x00\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.\' ",#\x1c\x1c(7),01444\x1f\'9=82<.342\xff\xc0\x00\x11\x08\x00\x01\x00\x01\x01\x01\x11\x00\x02\x11\x01\x03\x11\x01\xff\xc4\x00\x14\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\xff\xc4\x00\x14\x10\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xda\x00\x0c\x03\x01\x00\x02\x11\x03\x11\x00\x3f\x00\xaa\xff\xd9'
+        
+        url = f"{self.api_url}/upload"
+        headers = {'Authorization': f'Bearer {self.token}'}
+        
+        files = {'file': ('test.jpg', io.BytesIO(test_image_data), 'image/jpeg')}
+        
+        print(f"\n🔍 Testing Image Upload...")
+        print(f"   URL: {url}")
+        
+        try:
+            response = requests.post(url, files=files, headers=headers, timeout=10)
+            
+            success = response.status_code == 200
+            
+            if success:
+                try:
+                    response_data = response.json()
+                    if 'url' in response_data and 'filename' in response_data:
+                        print(f"   Upload successful: {response_data['url']}")
+                        self.log_test("Image Upload", True, f"File uploaded: {response_data['filename']}")
+                        return True, response_data
+                    else:
+                        self.log_test("Image Upload", False, "Missing url or filename in response")
+                        return False, {}
+                except:
+                    self.log_test("Image Upload", False, "Invalid JSON response")
+                    return False, {}
+            else:
+                try:
+                    error_data = response.json()
+                    self.log_test("Image Upload", False, f"Status: {response.status_code}, Response: {error_data}")
+                except:
+                    self.log_test("Image Upload", False, f"Status: {response.status_code}, Response: {response.text[:200]}")
+                return False, {}
+
+        except Exception as e:
+            self.log_test("Image Upload", False, f"Exception: {str(e)}")
+            return False, {}
+
+    def test_upload_non_image(self):
+        """Test upload with non-image file (should fail)"""
+        if not self.token:
+            self.log_test("Upload Non-Image", False, "No admin token available")
+            return False
+
+        # Create a text file
+        test_text_data = b'This is not an image file'
+        
+        url = f"{self.api_url}/upload"
+        headers = {'Authorization': f'Bearer {self.token}'}
+        
+        files = {'file': ('test.txt', io.BytesIO(test_text_data), 'text/plain')}
+        
+        print(f"\n🔍 Testing Non-Image Upload (should fail)...")
+        print(f"   URL: {url}")
+        
+        try:
+            response = requests.post(url, files=files, headers=headers, timeout=10)
+            
+            # Should return 400 for non-image files
+            success = response.status_code == 400
+            
+            if success:
+                self.log_test("Upload Non-Image", True, "Correctly rejected non-image file")
+                return True
+            else:
+                self.log_test("Upload Non-Image", False, f"Expected 400, got {response.status_code}")
+                return False
+
+        except Exception as e:
+            self.log_test("Upload Non-Image", False, f"Exception: {str(e)}")
+            return False
+
+    def test_serve_uploaded_file(self, file_url):
+        """Test that uploaded files can be served"""
+        if not file_url:
+            self.log_test("Serve Uploaded File", False, "No file URL provided")
+            return False
+
+        # Convert relative URL to full URL
+        if file_url.startswith('/api/uploads/'):
+            full_url = f"{self.base_url}{file_url}"
+        else:
+            full_url = file_url
+
+        print(f"\n🔍 Testing File Serving...")
+        print(f"   URL: {full_url}")
+        
+        try:
+            response = requests.get(full_url, timeout=10)
+            
+            success = response.status_code == 200
+            
+            if success:
+                content_type = response.headers.get('content-type', '')
+                if content_type.startswith('image/'):
+                    self.log_test("Serve Uploaded File", True, f"File served correctly, Content-Type: {content_type}")
+                    return True
+                else:
+                    self.log_test("Serve Uploaded File", False, f"Wrong content type: {content_type}")
+                    return False
+            else:
+                self.log_test("Serve Uploaded File", False, f"Status: {response.status_code}")
+                return False
+
+        except Exception as e:
+            self.log_test("Serve Uploaded File", False, f"Exception: {str(e)}")
+            return False
+
     def run_all_tests(self):
         """Run all tests in sequence"""
         print("🚀 Starting Scandi Motors API Tests")
@@ -414,6 +532,15 @@ class ScandiMotorsAPITester:
         # CRUD tests (requires admin token)
         self.test_car_crud_operations()
         self.test_article_crud_operations()
+
+        # Upload tests (requires admin token)
+        upload_success, upload_data = self.test_upload_image()
+        if upload_success and upload_data:
+            # Test serving the uploaded file
+            self.test_serve_uploaded_file(upload_data.get('url'))
+        
+        # Test upload validation
+        self.test_upload_non_image()
 
         # Print summary
         print("\n" + "=" * 60)

@@ -1,5 +1,6 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, UploadFile, File
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -10,6 +11,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
+import shutil
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -354,12 +356,34 @@ async def seed_data():
 
     return {"message": f"Seeded {len(cars)} cars and articles"}
 
+# Upload
+UPLOADS_DIR = ROOT_DIR / "uploads"
+UPLOADS_DIR.mkdir(exist_ok=True)
+
+@api_router.post("/upload")
+async def upload_image(file: UploadFile = File(...)):
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Only image files are allowed")
+    
+    ext = ".jpg"
+    filename = f"{uuid.uuid4().hex}{ext}"
+    filepath = UPLOADS_DIR / filename
+    
+    with open(filepath, "wb") as f:
+        content = await file.read()
+        f.write(content)
+    
+    return {"url": f"/api/uploads/{filename}", "filename": filename}
+
 # Health
 @api_router.get("/")
 async def root():
     return {"message": "Scandi Motors API"}
 
 app.include_router(api_router)
+
+# Serve uploaded files
+app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
